@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--数据源文件（告知程序着是数据源从这里拿数据Repository）-->
+<!--Repository： 是 spring Data 的一个核心接口，它不提供任何方法，开发者需要在自己定义的接口中声明需要的方法,仅仅是一个标识，表明任何继承它的均为仓库接口类，方便Spring自动扫描识别-->
+<!--resultType(输出类型),-->
+
+
+<mapper namespace="com.curddemo.demo.usermapper.DaoMapper">
+<!--配置 查询结果的列名和实体类的属性名的对应关系-->
+<!--Id 标签用于建立主键字段的映射关系，Result标签用于建立非主键字段的映射关系。
+Column 属性指定数据库字段名，Property 属性指定 POJO 属性名-->
+    <resultMap id="userMap" type="com.curddemo.demo.pojo.userdemo">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name"/>
+        <result column="age" property="age"/>
+        <result column="password" property="password"/>
+        <result column="newdate" property="newdate"/>
+    </resultMap>
+
+
+    <sql id="lee">
+        id,name,age,password,newdate
+    </sql>
+
+
+    <select id="findall" parameterType="com.curddemo.demo.pojo.userdemo" resultMap="userMap">
+        select
+        <include refid="lee"/> from user
+    </select>
+    <!--    parameterType 传入值的类型 决定-->
+    <select id="findid" parameterType="integer"  resultMap="userMap">
+        select <include refid="lee"></include>
+        from user  where id=#{id}
+    </select>
+
+    <select id="findlike" resultType="com.curddemo.demo.pojo.userdemo"  parameterType="com.curddemo.demo.pojo.userdemo">
+        select <include refid="lee"></include>
+        from USER  WHERE id   LIKE CONCAT('%',#{LIKE},'%')
+        OR name  LIKE CONCAT('%',#{LIKE},'%')  OR age LIKE  CONCAT('%',#{LIKE},'%')
+    </select>
+
+
+
+    <delete id="delectAll" parameterType="int">
+     delete from user
+    </delete>
+
+
+
+    <delete id="delectId" parameterType="int">
+        delete  from user  where id=#{id}
+    </delete>
+
+
+    <!--<insert id="addOnce" parameterType="com.example.democrud.democurd.pojo.userdemo">
+        insert  into user
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="name != null" >
+                name,
+            </if>
+            <if test="age != null" >
+                age,
+            </if>
+            <if test="password != null" >
+                password,
+            </if>
+            <if test="newdate != null" >
+                newdate,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null" >
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="age != null" >
+                #{age,,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null" >
+                #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="newdate != null" >
+                #{newdate,jdbcType=DATE},
+            </if>
+        </trim>
+    </insert>-->
+
+
+    <insert id="addOnce" parameterType="int">
+        insert into user (id,name,age,password,newdate)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id}, #{item.name},#{item.age},#{item.password},#{item.newdate}
+            )
+        </foreach>
+    </insert>
+
+
+    <!--    <update id="updateid" parameterType="int">-->
+    <!--         update user set-->
+    <!--      name=#{name},age=#{age},password=#{password},newdate={newdate}-->
+    <!--       where id=#{id}-->
+    <!--    </update>-->
+
+
+    <update id="updateid" parameterType="int">
+        update  user
+        <set>
+            <if test="name !=null">
+                name =#{name,jdbcType=VARCHAR},
+            </if>
+            <if test="age !=null">
+                age=#{age,jdbcType=VARCHAR},
+            </if>
+            <if test="password !=null">
+                password=#{password,jdbcType=VARCHAR},
+            </if>
+            <if test="newdate !=null">
+                newdate=#{newdate,jdbcType=DATE},
+            </if>
+        </set>
+
+        where id=#{id,jdbcType=VARCHAR}
+    </update>
+
+</mapper>
